@@ -1,0 +1,3 @@
+katnip==0.2.5
+kittyfuzzer==0.6.10
+winappdbg==1.5
