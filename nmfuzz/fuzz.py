@@ -8,7 +8,7 @@ from katnip.controllers.server.windbgcontroller import WinAppDbgController
 from kitty.fuzzers.server import ServerFuzzer
 from kitty.interfaces.web import WebInterface
 from kitty.model import GraphModel
-from kitty.model import String
+from kitty.model import Static
 from kitty.model import Template
 
 
@@ -96,8 +96,7 @@ class NmFuzzer(object):
 
         # Template
         t1 = Template(name="T1", fields=[
-            String("\xd4\xc3\xb2\xa1", name="S1_1"),
-            String("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", name="S1_2"),
+            Static("\xd4\xc3\xb2\xa1", name="S1_1"),
         ])
 
         model = GraphModel()
@@ -115,6 +114,9 @@ class NmFuzzer(object):
         # Start
         try:
             fuzzer.start()
+            logger.info("Done with fuzzing")
+            raw_input("Press enter to exit...")
+            fuzzer.stop()
 
         except KeyboardInterrupt:
             logger.info("Session interrupted by user...")
