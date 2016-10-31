@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import argparse
 import logging
 
@@ -113,8 +114,11 @@ class NmFuzzer(object):
 
         # Start
         try:
+            logger.info("Starting fuzz session...")
+            start_time = time.time()
             fuzzer.start()
-            logger.info("Done with fuzzing")
+            end_time = time.time()
+            logger.info("Done with fuzzing in {} seconds".format(end_time - start_time))
             raw_input("Press enter to exit...")
             fuzzer.stop()
 
