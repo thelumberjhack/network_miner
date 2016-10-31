@@ -13,6 +13,9 @@ from kitty.model import Static
 from kitty.model import Template
 
 
+from targets.winappdbgtarget import WinAppDbgTarget
+from model.corpus import Corpus
+
 # logging levels dict
 levels = {
     "debug": logging.DEBUG,
@@ -37,10 +40,11 @@ class NmFuzzer(object):
 
         mand = parser.add_argument_group("mandatory")
         mand.add_argument("-p", "--program", dest="target_prog", required=True, type=str)
+        mand.add_argument("-c", "--corpus", dest="test_corpus", required=True, type=str)
 
         # Optional arguments
         opt = parser.add_argument_group("Optional")
-        opt.add_argument("-l", "--log_level", dest="log_level", default="error", type=str,
+        opt.add_argument("-l", "--log_level", dest="log_level", default="debug", type=str,
                          choices=[choice for choice in levels.keys()])
 
         return parser.parse_args()
@@ -77,11 +81,17 @@ class NmFuzzer(object):
         prog = os.path.abspath(args.target_prog)
 
         # define target
-        target = ApplicationTarget(
+        # target = ApplicationTarget(
+        #     "NetworkMiner",
+        #     path=prog,
+        #     args="",
+        #     timeout=5,
+        #     logger=logger
+        # )
+        target = WinAppDbgTarget(
             "NetworkMiner",
-            path=prog,
-            args="",
-            timeout=5,
+            process_path=prog,
+            process_args=[],
             logger=logger
         )
 
@@ -96,8 +106,11 @@ class NmFuzzer(object):
         target.set_controller(controller)
 
         # Template
-        t1 = Template(name="T1", fields=[
-            Static("\xd4\xc3\xb2\xa1", name="S1_1"),
+        # t1 = Template(name="T1", fields=[
+        #     Static("\xd4\xc3\xb2\xa1", name="S1_1"),
+        # ])
+        t1 = Template(name="PCAPs", fields=[
+            Corpus("pcap", args.test_corpus)
         ])
 
         model = GraphModel()
