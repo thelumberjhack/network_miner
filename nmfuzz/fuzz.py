@@ -3,18 +3,19 @@ import sys
 import time
 import argparse
 import logging
+try:
+    import crypto
+    sys.modules['Crypto'] = crypto
 
-from katnip.targets.application import ApplicationTarget
-from katnip.controllers.server.windbgcontroller import WinAppDbgController
+except ImportError:
+    crypto = None
+
 from kitty.fuzzers.server import ServerFuzzer
 from kitty.interfaces.web import WebInterface
 from kitty.model import GraphModel
-from kitty.model import Static
 from kitty.model import Template
-
-
-from targets.winappdbgtarget import WinAppDbgTarget
-from model.corpus import Corpus
+from targets.windbgtarget import WinAppDbgTarget
+from katnip.model.low_level.fs_iterators import FsNames
 
 # logging levels dict
 levels = {
@@ -81,13 +82,6 @@ class NmFuzzer(object):
         prog = os.path.abspath(args.target_prog)
 
         # define target
-        # target = ApplicationTarget(
-        #     "NetworkMiner",
-        #     path=prog,
-        #     args="",
-        #     timeout=5,
-        #     logger=logger
-        # )
         target = WinAppDbgTarget(
             "NetworkMiner",
             process_path=prog,
@@ -95,22 +89,9 @@ class NmFuzzer(object):
             logger=logger
         )
 
-        # define the Controller
-        controller = WinAppDbgController(
-            "WinDBG",
-            process_path=prog,
-            process_args=[],
-            logger=logger
-        )
-
-        target.set_controller(controller)
-
         # Template
-        # t1 = Template(name="T1", fields=[
-        #     Static("\xd4\xc3\xb2\xa1", name="S1_1"),
-        # ])
         t1 = Template(name="PCAPs", fields=[
-            Corpus("pcap", args.test_corpus)
+            FsNames(args.test_corpus, name_filter="id*", name="pcaps"),
         ])
 
         model = GraphModel()
@@ -124,6 +105,7 @@ class NmFuzzer(object):
         fuzzer.set_interface(WebInterface())
         fuzzer.set_model(model)
         fuzzer.set_target(target)
+        fuzzer.set_delay_between_tests(2)
 
         # Start
         try:
