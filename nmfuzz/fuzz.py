@@ -16,6 +16,7 @@ from kitty.model import GraphModel
 from kitty.model import Template
 from targets.windbgtarget import WinAppDbgTarget
 from katnip.model.low_level.fs_iterators import FsNames
+from katnip.controllers.server.windbgcontroller import WinAppDbgController
 
 # logging levels dict
 levels = {
@@ -89,9 +90,19 @@ class NmFuzzer(object):
             logger=logger
         )
 
+        # define controller
+        controller = WinAppDbgController(
+            name="WinDBG controller",
+            process_path=os.path.abspath("C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\windbg.exe"),
+            process_args=[prog,],
+            logger=logger
+        )
+
+        target.set_controller(controller)
+
         # Template
         t1 = Template(name="PCAPs", fields=[
-            FsNames(args.test_corpus, name_filter="id*", name="pcaps"),
+            FsNames(args.test_corpus, name_filter="*.pcap", name="pcaps"),
         ])
 
         model = GraphModel()
