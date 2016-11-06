@@ -47,6 +47,8 @@ class NmFuzzer(object):
         opt = parser.add_argument_group("Optional")
         opt.add_argument("-l", "--log_level", dest="log_level", default="debug", type=str,
                          choices=[choice for choice in levels.keys()])
+        opt.add_argument("-t", "--test-case", dest="start", type=int, default=0,
+                         help="resume session from specific testcase")
 
         return parser.parse_args()
 
@@ -80,6 +82,7 @@ class NmFuzzer(object):
         args = cls.parse_args()
         logger = cls.logger(levels[args.log_level], "NetworkMiner.fuzz", "./session.log")
         prog = os.path.abspath(args.target_prog)
+        start_tc = int(args.start)
 
         # define target
         target = WinAppDbgTarget(
@@ -110,6 +113,7 @@ class NmFuzzer(object):
         # Start
         try:
             logger.info("Starting fuzz session...")
+            fuzzer.set_range(start_tc)
             start_time = time.time()
             fuzzer.start()
             end_time = time.time()
